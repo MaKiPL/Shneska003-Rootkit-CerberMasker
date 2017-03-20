@@ -6,17 +6,22 @@
 #include <Psapi.h>
 #include <WinBase.h>
 
+#define true 1
+#define false 0
+
 void FindProcs();
 int locFrstDirDiv(wchar_t * ptr);
 
 HWND taskmgr;
 DWORD taskmgrpid;
 DWORD prcs[1024] = { 0 };
-wchar_t * finame = (wchar_t*)malloc(256);
-wchar_t * procname = (wchar_t*)malloc(256);
+wchar_t * finame;
+wchar_t * procname;
 
 int main()
 {
+	finame = (wchar_t*)malloc(256);
+	procname = (wchar_t*)malloc(256);
 	while (true) 
 	{
 		FindProcs();
