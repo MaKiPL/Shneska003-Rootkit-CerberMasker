@@ -10,18 +10,22 @@
 #define false 0
 
 void FindProcs();
+void clsbuf();
 int locFrstDirDiv(wchar_t * ptr);
+BOOL CALLBACK EnumWindowsProc(_In_ HWND   hwnd, _In_ LPARAM lParam);
 
 HWND taskmgr;
 DWORD taskmgrpid;
 DWORD prcs[1024] = { 0 };
 wchar_t * finame;
 wchar_t * procname;
+wchar_t * cbuffer;
 
 int main()
 {
 	finame = (wchar_t*)malloc(256);
 	procname = (wchar_t*)malloc(256);
+	cbuffer = (wchar_t*)malloc(128 * sizeof(wchar_t));
 	while (true) 
 	{
 		FindProcs();
@@ -70,10 +74,46 @@ void FindProcs()
 
 		}
 	}
+	
 	if (taskmgrpid == NULL)
 		return;
-	//TODO
+
+	EnumWindows(EnumWindowsProc, NULL);
+	if (taskmgr == NULL)
+		return;
+	HWND parent = GetWindow(taskmgr, GW_OWNER);
+
+	__asm
+	{
+		INT 3
+	}
 	
+	//TODO
+}
+
+BOOL CALLBACK EnumWindowsProc(
+	_In_ HWND   hwnd,
+	_In_ LPARAM lParam
+) 
+{
+	DWORD * prcccid = 0;
+	
+	
+	GetWindowThreadProcessId(hwnd, &prcccid);
+	clsbuf();
+	GetClassName(hwnd, cbuffer, 128);
+	
+	if (prcccid == taskmgrpid) 
+	{
+		if (!lstrcmpW(cbuffer, L"TaskManagerWindow"))
+			taskmgr = hwnd;
+	}
+}
+
+void clsbuf()
+{
+	for (int i = 0; i < 256; i++)
+		*(cbuffer + (sizeof(char) * i)) = 0x00;
 }
 
 int locFrstDirDiv(wchar_t * ptr)
