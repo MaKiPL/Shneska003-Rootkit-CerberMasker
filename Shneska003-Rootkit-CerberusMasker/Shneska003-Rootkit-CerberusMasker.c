@@ -2,6 +2,7 @@
 // Written for educational purpouses
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <Windows.h>
 #include <Psapi.h>
 #include <WinBase.h>
@@ -61,6 +62,7 @@ void FindProcs()
 		{
 			memset(finame, '\0', 256);
 			GetProcessImageFileName(prc, finame, 256);
+			int lstrn = lstrlen(finame);
 			int pthstr = locFrstDirDiv(finame);
 			int relpthname = lstrlenW(finame) - pthstr;
 			//wchar_t * procname = (wchar_t*)malloc(relpthname);
@@ -81,7 +83,19 @@ void FindProcs()
 	EnumWindows(EnumWindowsProc, NULL);
 	if (taskmgr == NULL)
 		return;
-	HWND parent = GetWindow(taskmgr, GW_OWNER);
+	HWND deeper = GetWindow(taskmgr, GW_CHILD);
+	clsbuf();
+	GetClassName(deeper, cbuffer, 128);
+	if (lstrcmpW(cbuffer, L"NativeHWNDHost")) return -1;
+	taskmgr = deeper;
+	clsbuf();
+	deeper = GetWindow(taskmgr, GW_CHILD);
+	GetClassName(deeper, cbuffer, 128);
+	if (lstrcmpW(cbuffer, L"DirectUIHWND")) return -1;
+	
+	//test
+	LRESULT res = SendMessage(deeper, LB_GETCURSEL, 0, 0);
+	
 
 	__asm
 	{
